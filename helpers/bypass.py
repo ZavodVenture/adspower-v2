@@ -78,7 +78,7 @@ def reset_keplr():
 
             for log in log_files:
                 file = open(log, encoding='ANSI').read()
-                if 'keplr' in file:
+                if 'wallet.keplr.app' in file:
                     break
             else:
                 continue
