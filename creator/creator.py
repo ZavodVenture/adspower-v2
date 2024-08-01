@@ -71,17 +71,18 @@ def main():
         input("\nPress Enter to close program...")
         exit()
 
-    try:
-        r = bypass.bypass()
-    except Exception as e:
-        print(f'MetaMask bypass failed: {e}')
-        input("\nPress Enter to close program...")
-        exit()
+    if int(config['settings']['bypass_metamask']):
+        try:
+            r = bypass.bypass()
+        except Exception as e:
+            print(f'MetaMask bypass failed: {e}')
+            input("\nPress Enter to close program...")
+            exit()
 
-    if not r:
-        print('MetaMask bypass error. Check if the last version of extension is installed in AdsPower.')
-        input("\nPress Enter to close program...")
-        exit()
+        if not r:
+            print('MetaMask bypass error. Check if the last version of extension is installed in AdsPower.')
+            input("\nPress Enter to close program...")
+            exit()
 
     try:
         seeds = open('metamask.txt').read().split('\n')
