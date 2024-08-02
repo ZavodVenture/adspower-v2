@@ -79,6 +79,8 @@ def main():
 
     print('Pre-launch verefication...\n')
 
+    adspower.API_URL = f'http://localhost:{config["settings"]["port_number"]}/'
+
     try:
         adspower.check_adspower()
     except Exception as e:
