@@ -5,7 +5,7 @@ from shutil import rmtree
 
 
 def bypass():
-    for disk in ascii_uppercase:
+    for disk in ascii_uppercase.replace('A', ''):
         try:
             os.listdir(f'{disk}:\\.ADSPOWER_GLOBAL')
         except FileNotFoundError:
@@ -52,7 +52,7 @@ def bypass():
 
 
 def reset_keplr():
-    for disk in ascii_uppercase:
+    for disk in ascii_uppercase.replace('A', ''):
         try:
             os.listdir(f'{disk}:\\.ADSPOWER_GLOBAL')
         except FileNotFoundError:
