@@ -71,6 +71,188 @@ class Worker:
 
         return self.driver.execute_script(script)
 
+    def get_phantom_status(self):
+        extensions = self.get_extensions()
+        phantom_id = extensions.get('Phantom')
+        if not phantom_id:
+            raise Exception('Phantom Extension not found')
+
+        before = self.driver.current_window_handle
+        self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
+        sleep(2)
+
+        windows = self.driver.window_handles
+        if before not in windows:
+            self.driver.switch_to.window(windows[0])
+            return 'new'
+
+        try:
+            WebDriverWait(self.driver, 3).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="unlock-form-password-input"]')))
+        except TimeoutException:
+            return 'unlocked'
+        else:
+            return 'locked'
+
+    def import_phantom(self):
+        extensions = self.get_extensions()
+        phantom_id = extensions.get('Phantom')
+        if not phantom_id:
+            raise Exception('Phantom Extension not found')
+
+        self.driver.get(f'chrome-extension://{phantom_id}/onboarding.html')
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/main/div[2]/div/div[2]/button[2]'))).click()
+        sleep(1)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/main/div[2]/div/div[2]'))).click()
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="secret-recovery-phrase-word-input-0"]')))
+
+        seed = self.seed.split(' ')
+
+        if len(seed) != 12:
+            raise WorkerException('Couldn\'t import seed into phantom: seed must be 12 words length')
+
+        for i in range(len(seed)):
+            self.driver.find_element(By.XPATH, f'//input[@data-testid="secret-recovery-phrase-word-input-{i}"]').send_keys(seed[i])
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+
+        sleep(1)
+
+        WebDriverWait(self.driver, 60).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="onboarding-form-password-input"]'))).send_keys(self.password)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="onboarding-form-confirm-password-input"]'))).send_keys(self.password)
+        WebDriverWait(self.driver, 15).until(ec.presence_of_element_located((By.XPATH, '//input[@data-testid="onboarding-form-terms-of-service-checkbox"]'))).click()
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+
+        sleep(1)
+
+        before = self.driver.current_window_handle
+        self.driver.switch_to.new_window()
+        self.driver.get('about:blank')
+        after = self.driver.current_window_handle
+        self.driver.switch_to.window(before)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+        self.driver.switch_to.window(after)
+
+        self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
+
+        try:
+            el = WebDriverWait(self.driver, 5).until(ec.presence_of_element_located((By.XPATH, '//div[@class="sc-wkwDy bLvPKZ"]')))
+        except TimeoutException:
+            pass
+        else:
+            el.find_element(By.XPATH, 'div[1]/div[1]').click()
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="settings-item-security-and-privacy"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[6]/div/div/div/div[1]/div[2]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[6]/div/div/div/div[9]'))).click()
+
+        sleep(1)
+
+        self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="lock-menu-item"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="unlock-form-password-input"]'))).send_keys(self.password)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="unlock-form-submit-button"]'))).click()
+        sleep(2)
+
+        self.driver.get('about:blank')
+
+    def restore_phantom(self):
+        extensions = self.get_extensions()
+        phantom_id = extensions.get('Phantom')
+        if not phantom_id:
+            raise Exception('Phantom Extension not found')
+
+        self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="unlock-form"]/div/p[2]'))).click()
+        sleep(0.5)
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[1]/div[3]/div/div/button'))).click()
+        WebDriverWait(self.driver, 15).until(ec.number_of_windows_to_be(2))
+        self.driver.close()
+        windows = self.driver.window_handles
+        self.driver.switch_to.window(windows[0])
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="secret-recovery-phrase-word-input-0"]')))
+
+        seed = self.seed.split(' ')
+
+        if len(seed) != 12:
+            raise WorkerException('Couldn\'t import seed into phantom: seed must be 12 words length')
+
+        for i in range(len(seed)):
+            self.driver.find_element(By.XPATH, f'//input[@data-testid="secret-recovery-phrase-word-input-{i}"]').send_keys(seed[i])
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+
+        sleep(1)
+
+        WebDriverWait(self.driver, 60).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="onboarding-form-password-input"]'))).send_keys(self.password)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="onboarding-form-confirm-password-input"]'))).send_keys(self.password)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+
+        sleep(1)
+
+        before = self.driver.current_window_handle
+        self.driver.switch_to.new_window()
+        self.driver.get('about:blank')
+        after = self.driver.current_window_handle
+        self.driver.switch_to.window(before)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="onboarding-form-submit-button"]'))).click()
+        self.driver.switch_to.window(after)
+
+        self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
+
+        try:
+            el = WebDriverWait(self.driver, 5).until(ec.presence_of_element_located((By.XPATH, '//div[@class="sc-wkwDy bLvPKZ"]')))
+        except TimeoutException:
+            pass
+        else:
+            el.find_element(By.XPATH, 'div[1]/div[1]').click()
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="settings-item-security-and-privacy"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[6]/div/div/div/div[1]/div[2]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/div[6]/div/div/div/div[9]'))).click()
+
+        sleep(1)
+
+        self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
+
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="lock-menu-item"]'))).click()
+        sleep(0.5)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//input[@data-testid="unlock-form-password-input"]'))).send_keys(self.password)
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//button[@data-testid="unlock-form-submit-button"]'))).click()
+        sleep(2)
+
+        self.driver.get('about:blank')
+
     def get_metamask_status(self):
         extensions = self.get_extensions()
         metamask_id = extensions.get('MetaMask')

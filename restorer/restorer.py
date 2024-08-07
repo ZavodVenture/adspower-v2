@@ -65,6 +65,15 @@ def worker(serial_number, seed, bar: Bar):
                 p_worker.import_metamask()
         if DO_KEPLR:
             p_worker.import_keplr()
+        if DO_PHANTOM:
+            phantom_status = p_worker.get_phantom_status()
+
+            if phantom_status == 'unlocked':
+                pass
+            elif phantom_status == 'locked':
+                p_worker.restore_phantom()
+            else:
+                p_worker.import_phantom()
     except WorkerException as e:
         print(e)
     except Exception as e:

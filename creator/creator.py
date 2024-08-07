@@ -50,6 +50,8 @@ def worker(serial_number, seed, bar: Bar):
             p_worker.import_metamask()
         if DO_KEPLR:
             p_worker.import_keplr()
+        if DO_PHANTOM:
+            p_worker.import_phantom()
     except WorkerException as e:
         print(e)
     except Exception as e:
