@@ -28,11 +28,12 @@ def search_profiles():
     group_name = profile_data['group_name']
 
     try:
-        offset = int(re.findall(r'Profiles(\d*)-\d*_.*', group_name)[0]) - 1
+        first_profile = int(re.findall(r'Profiles(\d*)-\d*_.*', group_name)[0]) - 1
     except Exception as e:
         raise Exception('Could not determine the number of the first profile in the group (the group has a non-standard name)')
 
     profiles_in_group = adspower.get_profiles_in_group(profile_data['group_id'])
+    profiles_in_group.sort(key=lambda k: int(k['serial_number']))
 
     for serial_number in serial_numbers:
         try:
@@ -40,7 +41,12 @@ def search_profiles():
         except ValueError:
             raise Exception(f'Couldn\'t find profile {serial_number} in group')
 
-    return offset
+    if [int(i['serial_number']) for i in profiles_in_group].index(FIRST_PROFILE) != 0:
+        additional_offset = [int(i['serial_number']) for i in profiles_in_group].index(FIRST_PROFILE)
+    else:
+        additional_offset = 0
+
+    return first_profile + additional_offset
 
 
 def worker(serial_number, seed, bar: Bar):

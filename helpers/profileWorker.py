@@ -139,13 +139,12 @@ class Worker:
         self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
 
         try:
-            el = WebDriverWait(self.driver, 5).until(ec.presence_of_element_located((By.XPATH, '//div[@class="sc-wkwDy bLvPKZ"]')))
+            WebDriverWait(self.driver, 5).until(
+                ec.element_to_be_clickable((By.XPATH, '//div[@id="modal"]/div[2]/div/div[3]/div/button[2]'))).click()
         except TimeoutException:
             pass
-        else:
-            el.find_element(By.XPATH, 'div[1]/div[1]').click()
 
-        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="settings-menu-open-button"]'))).click()
         sleep(0.5)
         WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
         sleep(0.5)
@@ -159,7 +158,7 @@ class Worker:
 
         self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
 
-        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="settings-menu-open-button"]'))).click()
         sleep(0.5)
         WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
         sleep(0.5)
@@ -221,13 +220,11 @@ class Worker:
         self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
 
         try:
-            el = WebDriverWait(self.driver, 5).until(ec.presence_of_element_located((By.XPATH, '//div[@class="sc-wkwDy bLvPKZ"]')))
+            WebDriverWait(self.driver, 5).until(ec.element_to_be_clickable((By.XPATH, '//div[@id="modal"]/div[2]/div/div[3]/div/button[2]'))).click()
         except TimeoutException:
             pass
-        else:
-            el.find_element(By.XPATH, 'div[1]/div[1]').click()
 
-        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="settings-menu-open-button"]'))).click()
         sleep(0.5)
         WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
         sleep(0.5)
@@ -241,7 +238,7 @@ class Worker:
 
         self.driver.get(f'chrome-extension://{phantom_id}/popup.html')
 
-        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="root"]/div/div/section/div[1]/button'))).click()
+        WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="settings-menu-open-button"]'))).click()
         sleep(0.5)
         WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@data-testid="sidebar_menu-button-settings"]'))).click()
         sleep(0.5)
