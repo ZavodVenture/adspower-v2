@@ -290,7 +290,7 @@ class Worker:
 
             sleep(2)
 
-            WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@class="sc-jQHtVU iEYmkL"]/div[1]//input')))
+            WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//div[@class="sc-gsnTZi jiaani"][1]/div[2]/div[2]/div/div/input')))
 
             seed = self.seed.split(' ')
 
@@ -298,7 +298,7 @@ class Worker:
                 raise WorkerException('Couldn\'t import seed into keplr: seed must be 12 words length')
 
             for i in range(len(seed)):
-                self.driver.find_element(By.XPATH, f'//div[@class="sc-jQHtVU iEYmkL"]/div[{i + 1}]//input').send_keys(seed[i])
+                self.driver.find_element(By.XPATH, f'//div[@class="sc-gsnTZi jiaani"][{i + 1}]/div[2]/div[2]/div/div/input').send_keys(seed[i])
 
             WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable((By.XPATH, '//*[@id="app"]/div/div[2]/div/div/div[3]/div/div/form/div[6]/div/button'))).click()
 
